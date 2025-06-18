@@ -215,8 +215,6 @@ def extract_pdf_data(pdf_path):
                 if quantity is None or quantity <= 0:
                     continue
 
-                st.write(f"Processing field: {field_name} with quantity: {quantity}")
-
                 # Try to match field name with product patterns
                 matched_product = None
                 matched_pattern = None
@@ -255,7 +253,6 @@ def extract_pdf_data(pdf_path):
                         
                         # Check if we've already processed this exact field
                         if field_name in processed_fields:
-                            st.warning(f"Skipping duplicate field: {field_name} (matched: {matched_product} with pattern: {matched_pattern})")
                             continue
                         
                         # Create new order item
@@ -269,13 +266,10 @@ def extract_pdf_data(pdf_path):
                         order_data.append(order_item)
                         processed_fields.add(field_name)
                         processed_products[product_key] = order_item
-                        
-                        # Log the successful match
-                        st.write(f"Matched field '{field_name}' as '{matched_product}' using pattern '{matched_pattern}'")
                     else:
-                        st.warning(f"Product '{matched_product}' found in PDF but not in catalog")
+                        continue
                 else:
-                    st.warning(f"Could not match field '{field_name}' to any known product")
+                    continue
 
             except Exception as e:
                 st.error(f"Error processing field {field_name}: {str(e)}")
@@ -363,7 +357,18 @@ def main():
             st.subheader("Order Details")
             # Create DataFrame from all items except the stats item
             df = pd.DataFrame([item for item in data if item.get('Product Name') != 'Total'])
+            
+            # Reorder columns
+            column_order = ['Customer Name', 'Order Date', 'Product Code', 'Product Name', 'Size', 'Quantity']
+            df = df[column_order]
+            
             st.dataframe(df)
+            
+            # Add debugging info under the table
+            st.subheader("Extracted Items")
+            for item in data:
+                if item.get('Product Name') != 'Total':
+                    st.write(f"Field: {item.get('Product Name')} ({item.get('Size')}) - Quantity: {item.get('Quantity')}")
             
             # Add CSV export button
             if st.button('Export to CSV'):
