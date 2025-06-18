@@ -184,8 +184,6 @@ def extract_pdf_data(pdf_path):
         }
 
         # Process each field
-        processed_fields = set()  # Track which fields we've processed
-        
         for field_name, field in form_fields.items():
             try:
                 value = field.get('/V', '')
@@ -205,132 +203,14 @@ def extract_pdf_data(pdf_path):
                 if quantity is None or quantity <= 0:
                     continue
 
-                # Skip if we've already processed this field
-                if field_name in processed_fields:
-                    st.write(f"Skipping duplicate field: {field_name}")
-                    continue
-
                 st.write(f"Processing field: {field_name} with quantity: {quantity}")
 
                 # Try to match field name with product patterns
                 matched_product = None
-                matched_code = None
-                
-                # First try to match by product code if it exists in the field name
-                product_codes = {
-                    'CNCH': 'Chicken Noodle',
-                    'CCRC': 'Creamy Chicken',
-                    'CHB': 'Hearty Beef',
-                    'CAGR': 'Ancient Grain',
-                    'CBAB': 'Beef & Barley',
-                    'CCCORN': 'Chicken & Corn',
-                    'CCMIN': 'Chunky Minestrone',
-                    'CMUSH': 'Creamy Mushroom',
-                    'CRMPUM': 'Creamy Pumpkin',
-                    'CFON': 'French Onion',
-                    'CHVEG': 'Hearty Vegetable',
-                    'CLEN': 'Lentil',
-                    'CPH': 'Pea & Ham',
-                    'CPLE': 'Potato & Leek',
-                    'CSP': 'Sweet Potato',
-                    'CTOM': 'Tomato',
-                    'CCHV350': 'Chicken & Vegetable 350',
-                    'CTOM350': 'Tomato 350',
-                    'CACH': 'Asian Chicken',
-                    'CCCH': 'Crab Chowder',
-                    'CLAK': 'Chicken Laksa',
-                    'CTHP': 'Thai Prawn',
-                    'CACH600': 'Asian Chicken 600',
-                    'CCCH600': 'Crab & Corn 600',
-                    'CTHP600': 'Thai Prawn 600',
-                    'CMOR600': 'Moroccan Harira 600',
-                    'CCTG': 'Chicken Tagine',
-                    'CRCC': 'Red Chicken Curry',
-                    'CRVC': 'Red Vegetable Curry',
-                    'CHM350': 'Hummous 350',
-                    'CHLH330': 'Chilli Lemon Hummous 330',
-                    'CEHH330': 'Chunky Eggplant Hummous 330',
-                    'COHH330': 'Olive Salsa Hummous 330',
-                    'CGD310': 'Garlic Dip 310',
-                    'CTA310': 'Taramosalata 310',
-                    'CBRA200': 'Beetroot Almond 200',
-                    'CHH200': 'Chunky Hummous 200',
-                    'CCS200': 'Capsicum Salsa 200',
-                    'CEC200': 'Eggplant Capsicum 200',
-                    'CEH200': 'Eggplant Hummous 200',
-                    'CHM200': 'Hummous 200',
-                    'CSC200': 'Spicy Carrot 200',
-                    'CGD180': 'Garlic Dip 180',
-                    'CTA180': 'Taramosalata 180',
-                    'CSS170': 'Smoked Salmon 170',
-                    'CBG': 'Baba Ganoush',
-                    'CBRH': 'Beetroot Hummus',
-                    'CCHK': 'Chilli Kalamata Hummus',
-                    'CHH': 'Harissa Hummus',
-                    'CMH': 'Mediterranean Hummus',
-                    'COH': 'Olive Hummus',
-                    'CPH': 'Pine Nut Hummus',
-                    'CRGH': 'Roasted Garlic Hummus',
-                    'CHM1KG': 'Hummus 1kg'
-                }
-                
-                # Debug logging
-                st.write(f"Processing field: {field_name}")
-                st.write(f"Looking for codes: {product_codes.keys()}")
-                
-                # First try to match by product code
-                for code in product_codes.keys():
-                    # Look for exact code match at the start of the field name
-                    if field_name.startswith(code):
-                        matched_product = product_codes[code]
-                        matched_code = code
+                for product_name, patterns in product_patterns.items():
+                    if any(pattern.lower() in field_name.lower() for pattern in patterns):
+                        matched_product = product_name
                         break
-                    # Also check if code is followed by space or underscore
-                    elif f"{code} " in field_name or f"{code}_" in field_name:
-                        matched_product = product_codes[code]
-                        matched_code = code
-                        break
-                
-                # If no code match, try pattern matching
-                if not matched_product:
-                    for product_name, patterns in product_patterns.items():
-                        if any(pattern.lower() in field_name.lower() for pattern in patterns):
-                            matched_product = product_name
-                            break
-                    st.write(f"Matched by pattern: {product_name}")
-                
-                if matched_product:
-                    # Look up product details from catalog
-                    product_info = product_catalog.get(matched_product)
-                    if product_info:
-                        # Override the product code if we matched by code
-                        if matched_code:
-                            product_info['Product Code'] = matched_code
-                            st.write(f"Using code from field: {matched_code}")
-                        
-                        # Get size from field name if it contains a size specification
-                        size = product_info['Size']
-                        if '350' in field_name.lower():
-                            size = "350g"
-                            st.write(f"Using size from field: 350g")
-                        elif '600' in field_name.lower():
-                            size = "600g"
-                            st.write(f"Using size from field: 600g")
-                        elif '200' in field_name.lower():
-                            size = "200g"
-                            st.write(f"Using size from field: 200g")
-                        elif '180' in field_name.lower():
-                            size = "180g"
-                            st.write(f"Using size from field: 180g")
-                        elif '170' in field_name.lower():
-                            size = "170g"
-                            st.write(f"Using size from field: 170g")
-                        elif '1kg' in field_name.lower():
-                            size = "1kg"
-                            st.write(f"Using size from field: 1kg")
-                        
-                        # Debug logging
-                        st.write(f"Final product info: {matched_product} ({size}) - Code: {product_info['Product Code']}")
 
                 if matched_product:
                     # Look up product details from catalog
@@ -351,33 +231,12 @@ def extract_pdf_data(pdf_path):
                         elif '1kg' in field_name.lower():
                             size = "1kg"
                         
-                        # Create a unique product key using product code and size
-                        product_key = f"{product_info['Product Code']}_{size}"
-                        
-                        # Check if this product already exists in line_items
-                        existing_item = None
-                        for item in line_items:
-                            if (item['Product Code'] == product_info['Product Code'] and 
-                                item['Size'] == size):
-                                existing_item = item
-                                break
-                        
-                        if existing_item:
-                            # If it exists, add the quantity to the existing item
-                            existing_item['Quantity'] += quantity
-                            st.write(f"Adding {quantity} to existing item: {product_key} - New total: {existing_item['Quantity']}")
-                        else:
-                            # If it doesn't exist, add a new item
-                            line_items.append({
-                                'Product Name': matched_product,
-                                'Product Code': product_info['Product Code'],
-                                'Size': size,
-                                'Quantity': quantity
-                            })
-                            st.write(f"Creating new item: {product_key} - Quantity: {quantity}")
-                        
-                        # Mark this field as processed
-                        processed_fields.add(field_name)
+                        line_items.append({
+                            'Product Name': matched_product,
+                            'Product Code': product_info['Product Code'],
+                            'Size': size,
+                            'Quantity': quantity
+                        })
                     else:
                         st.warning(f"Product '{matched_product}' found in PDF but not in catalog")
                 else:
@@ -465,9 +324,7 @@ def main():
             # Display line items
             st.subheader("Order Details")
             if data['line_items']:
-                # Create DataFrame with columns reordered to show Product Code first
                 df = pd.DataFrame(data['line_items'])
-                df = df[['Product Code', 'Product Name', 'Size', 'Quantity']]
                 st.dataframe(df)
                 
                 # Add CSV export button
