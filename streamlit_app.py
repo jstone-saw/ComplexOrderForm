@@ -274,18 +274,25 @@ def extract_pdf_data(pdf_path):
                     'CHM1KG': 'Hummus 1kg'
                 }
                 
+                # Debug logging
+                st.write(f"Processing field: {field_name}")
+                st.write(f"Looking for codes: {product_codes.keys()}")
+                
                 # First try to match by product code
                 for code, product in product_codes.items():
                     if code in field_name:
                         matched_product = product
                         matched_code = code
+                        st.write(f"Matched by code: {code} -> {product}")
                         break
                 
                 # If no code match, try pattern matching
                 if not matched_product:
+                    st.write("No code match, trying pattern matching...")
                     for product_name, patterns in product_patterns.items():
                         if any(pattern.lower() in field_name.lower() for pattern in patterns):
                             matched_product = product_name
+                            st.write(f"Matched by pattern: {product_name}")
                             break
 
                 if matched_product:
@@ -295,21 +302,31 @@ def extract_pdf_data(pdf_path):
                         # Override the product code if we matched by code
                         if matched_code:
                             product_info['Product Code'] = matched_code
+                            st.write(f"Using code from field: {matched_code}")
                         
                         # Get size from field name if it contains a size specification
                         size = product_info['Size']
                         if '350' in field_name.lower():
                             size = "350g"
+                            st.write(f"Using size from field: 350g")
                         elif '600' in field_name.lower():
                             size = "600g"
+                            st.write(f"Using size from field: 600g")
                         elif '200' in field_name.lower():
                             size = "200g"
+                            st.write(f"Using size from field: 200g")
                         elif '180' in field_name.lower():
                             size = "180g"
+                            st.write(f"Using size from field: 180g")
                         elif '170' in field_name.lower():
                             size = "170g"
+                            st.write(f"Using size from field: 170g")
                         elif '1kg' in field_name.lower():
                             size = "1kg"
+                            st.write(f"Using size from field: 1kg")
+                        
+                        # Debug logging
+                        st.write(f"Final product info: {matched_product} ({size}) - Code: {product_info['Product Code']}")
 
                 if matched_product:
                     # Look up product details from catalog
