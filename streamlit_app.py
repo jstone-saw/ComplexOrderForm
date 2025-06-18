@@ -182,7 +182,8 @@ def extract_pdf_data(pdf_path):
             'Hummus 1kg': ['Hummus 1kg', 'CHM1KG', 'hummus1kg']
         }
 
-        # Track processed products to combine quantities
+        # Track processed fields and products
+        processed_fields = set()
         processed_products = {}
         
         # Process each field
@@ -243,24 +244,24 @@ def extract_pdf_data(pdf_path):
                             size = "1kg"
                         
                         # Create unique key for this product variant
-                        product_key = f"{matched_product}_{size}"
+                        product_key = f"{field_name}_{matched_product}_{size}"
                         
-                        # Check if we've already processed this product
-                        if product_key in processed_products:
-                            # Add to existing quantity
-                            processed_products[product_key]['Quantity'] += quantity
-                            st.write(f"Combined quantity for {matched_product} ({size}): {processed_products[product_key]['Quantity']}")
-                        else:
-                            # Create new order item
-                            order_item = {
-                                'Product Name': matched_product,
-                                'Product Code': product_info['Product Code'],
-                                'Size': size,
-                                'Quantity': quantity,
-                                **customer_info  # Include all customer info
-                            }
-                            order_data.append(order_item)
-                            processed_products[product_key] = order_item
+                        # Check if we've already processed this exact field
+                        if field_name in processed_fields:
+                            st.warning(f"Skipping duplicate field: {field_name}")
+                            continue
+                        
+                        # Create new order item
+                        order_item = {
+                            'Product Name': matched_product,
+                            'Product Code': product_info['Product Code'],
+                            'Size': size,
+                            'Quantity': quantity,
+                            **customer_info  # Include all customer info
+                        }
+                        order_data.append(order_item)
+                        processed_fields.add(field_name)
+                        processed_products[product_key] = order_item
                     else:
                         st.warning(f"Product '{matched_product}' found in PDF but not in catalog")
                 else:
