@@ -216,10 +216,25 @@ def extract_pdf_data(pdf_path):
                     # Look up product details from catalog
                     product_info = product_catalog.get(matched_product)
                     if product_info:
+                        # Get size from field name if it contains a size specification
+                        size = product_info['Size']
+                        if '350' in field_name.lower():
+                            size = "350g"
+                        elif '600' in field_name.lower():
+                            size = "600g"
+                        elif '200' in field_name.lower():
+                            size = "200g"
+                        elif '180' in field_name.lower():
+                            size = "180g"
+                        elif '170' in field_name.lower():
+                            size = "170g"
+                        elif '1kg' in field_name.lower():
+                            size = "1kg"
+                        
                         line_items.append({
                             'Product Name': matched_product,
                             'Product Code': product_info['Product Code'],
-                            'Size': product_info['Size'],
+                            'Size': size,
                             'Quantity': quantity
                         })
                     else:
