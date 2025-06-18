@@ -94,11 +94,32 @@ def extract_pdf_data(pdf_path):
         customer_fields = [
             'Customer Name', 'Company', 'Email', 'Phone',
             'customer_name', 'company', 'email', 'phone',
-            'name', 'customer', 'contact'
+            'name', 'customer', 'contact',
+            'Date', 'date', 'Order Date', 'order_date'
         ]
-        for field in customer_fields:
-            if field in form_fields:
-                customer_info[field] = form_fields[field].get('/V', '')
+        
+        # Process each field to extract customer info
+        for field_name, field in form_fields.items():
+            value = field.get('/V', '')
+            if not value:
+                continue
+                
+            # Try to match with customer fields
+            for field in customer_fields:
+                if field.lower() in field_name.lower():
+                    # Special handling for date field
+                    if 'date' in field.lower():
+                        try:
+                            # Try to parse date in format DD/MM/YYYY
+                            date_value = value.strip()
+                            if '/' in date_value:
+                                customer_info['Order Date'] = date_value
+                                break
+                        except:
+                            continue
+                    else:
+                        customer_info[field] = value
+                        break
         
         # Define comprehensive product patterns
         product_patterns = {
