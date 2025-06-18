@@ -320,34 +320,38 @@ def main():
         if data:
             # Display customer information
             st.subheader("Customer Information")
-            customer_info = data['customer_info']
-            for key, value in customer_info.items():
-                st.write(f"**{key}:** {value}")
+            # Extract customer info from first item since it's consistent across all items
+            customer_info = data[0]
+            for key in ['Customer Name', 'Company', 'Email', 'Phone', 'Order Date']:
+                if key in customer_info:
+                    st.write(f"**{key}:** {customer_info[key]}")
             
             # Display order statistics
             st.subheader("Order Summary")
-            stats = data['stats']
-            col1, col2 = st.columns(2)
-            col1.metric("Total Products", stats['total_products'])
-            col2.metric("Total Quantity", stats['total_quantity'])
+            # Find the stats item (it has 'Total' as Product Name)
+            stats_item = next((item for item in data if item.get('Product Name') == 'Total'), None)
+            if stats_item:
+                col1, col2 = st.columns(2)
+                col1.metric("Total Products", stats_item.get('Total Products', 0))
+                col2.metric("Total Quantity", stats_item.get('Quantity', 0))
             
             # Display line items
             st.subheader("Order Details")
-            if data['line_items']:
-                df = pd.DataFrame(data['line_items'])
-                st.dataframe(df)
-                
-                # Add CSV export button
-                if st.button('Export to CSV'):
-                    filename = export_to_csv(data)
-                    if filename:
-                        st.success(f"Order exported to {filename}")
-                        st.download_button(
-                            label="Download CSV",
-                            data=open(filename, 'rb').read(),
-                            file_name=filename,
-                            mime='text/csv'
-                        )
+            # Create DataFrame from all items except the stats item
+            df = pd.DataFrame([item for item in data if item.get('Product Name') != 'Total'])
+            st.dataframe(df)
+            
+            # Add CSV export button
+            if st.button('Export to CSV'):
+                filename = export_to_csv(data)
+                if filename:
+                    st.success(f"Order exported to {filename}")
+                    st.download_button(
+                        label="Download CSV",
+                        data=open(filename, 'rb').read(),
+                        file_name=filename,
+                        mime='text/csv'
+                    )
             else:
                 st.info("No items ordered")
         
