@@ -362,8 +362,13 @@ def main():
             column_order = ['Customer Name', 'Order Date', 'Product Code', 'Product Name', 'Size', 'Quantity']
             df = df[column_order]
             
+            # Style the dataframe to center the Quantity column
+            styled_df = df.style.set_properties(**{
+                'text-align': 'center'
+            }, subset=['Quantity'])
+            
             # Show all rows without scrolling
-            st.dataframe(df, height=2000)  # Adjust height as needed
+            st.dataframe(styled_df, height=2000)  # Adjust height as needed
             
             # Add debugging info under the table
             st.subheader("Extracted Items")
