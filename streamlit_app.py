@@ -390,10 +390,9 @@ def main():
             for item in data:
                 if item.get('Product Name') != 'Total':
                     product_name = item.get('Product Name', '')
-                    product_code = item.get('Product Code', '')
                     size = item.get('Size', '')
                     quantity = item.get('Quantity', 0)
-                    st.write(f"Field: {product_name} (Code: {product_code}, Size: {size}) - Quantity: {quantity}")
+                    st.write(f"Field: {product_name} (Size: {size}) - Quantity: {quantity}")
             
             # Add CSV export button
             if st.button('Export to CSV'):
