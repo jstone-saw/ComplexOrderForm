@@ -52,7 +52,7 @@ def extract_pdf_data(pdf_path):
             if field in form_fields:
                 customer_info[field] = form_fields[field].get('/V', '')
         
-        # Define product patterns
+        # Define comprehensive product patterns
         product_patterns = {
             # Soup products
             'Ancient Grain': ['Ancient Grain', 'CAGR', 'agr', 'ancient'],
@@ -65,7 +65,53 @@ def extract_pdf_data(pdf_path):
             'Creamy Pumpkin': ['Creamy Pumpkin', 'CRMPUM', 'pumpkin', 'crmp'],
             'French Onion': ['French Onion', 'CFON', 'onion', 'fon'],
             'Hearty Beef': ['Hearty Beef', 'CHB', 'heartybeef', 'hb'],
-            # Add more patterns as needed
+            'Hearty Chicken': ['Hearty Chicken', 'CHCK', 'chicken', 'chixken'],
+            'Hearty Vegetable': ['Hearty Vegetable', 'CHVEG', 'vegetable'],
+            'Lentil': ['Lentil', 'CLEN', 'lentils'],
+            'Pea & Ham': ['Pea & Ham', 'CPH', 'pea', 'ham'],
+            'Potato & Leek': ['Potato & Leek', 'CPLE', 'potato', 'leek'],
+            'Sweet Potato': ['Sweet Potato', 'CSP', 'sweet'],
+            'Tomato': ['Tomato', 'CTOM', 'tomatoes'],
+            'Asian Chicken': ['Asian Chicken', 'CACH', 'asian'],
+            'Crab Chowder': ['Crab Chowder', 'CCCH', 'crab'],
+            'Chicken Laksa': ['Chicken Laksa', 'CLAK', 'laksa'],
+            'Thai Prawn': ['Thai Prawn', 'CTHP', 'prawn', 'thai'],
+            'Chicken & Vegetable 350': ['Chicken & Vegetable 350', 'CCHV350', 'chickenveg350'],
+            'Tomato 350': ['Tomato 350', 'CTOM350', 'tomato350'],
+            'Asian Chicken 600': ['Asian Chicken 600', 'CACH600', 'asian600'],
+            'Crab & Corn 600': ['Crab & Corn 600', 'CCCH600', 'crabcorn600'],
+            'Thai Prawn 600': ['Thai Prawn 600', 'CTHP600', 'prawn600'],
+            'Moroccan Harira 600': ['Moroccan Harira 600', 'CMOR600', 'moroccan600'],
+            'Chicken Tagine': ['Chicken Tagine', 'CCTG', 'tagine'],
+            'Red Chicken Curry': ['Red Chicken Curry', 'CRCC', 'redchicken'],
+            'Red Vegetable Curry': ['Red Vegetable Curry', 'CRVC', 'redveg'],
+            'Hummous 350': ['Hummous 350', 'CHM350', 'hummous350'],
+            'Chilli Lemon Hummous 330': ['Chilli Lemon Hummous 330', 'CHLH330', 'chillilemon330'],
+            'Chunky Eggplant Hummous 330': ['Chunky Eggplant Hummous 330', 'CEHH330', 'chunkyeggplant330'],
+            'Olive Salsa Hummous 330': ['Olive Salsa Hummous 330', 'COHH330', 'olivesalsa330'],
+            'Garlic Dip 310': ['Garlic Dip 310', 'CGD310', 'garlicdip310'],
+            'Taramosalata 310': ['Taramosalata 310', 'CTA310', 'taramosalata310'],
+            'Beetroot Almond 200': ['Beetroot Almond 200', 'CBRA200', 'beetroot200'],
+            'Chunky Hummous 200': ['Chunky Hummous 200', 'CHH200', 'chunky200'],
+            'Capsicum Salsa 200': ['Capsicum Salsa 200', 'CCS200', 'capsicum200'],
+            'Eggplant Capsicum 200': ['Eggplant Capsicum 200', 'CEC200', 'eggplantcapsicum200'],
+            'Eggplant Hummous 200': ['Eggplant Hummous 200', 'CEH200', 'eggplanthummous200'],
+            'Hummous 200': ['Hummous 200', 'CHM200', 'hummous200'],
+            'Harissa Hummous 200': ['Harissa Hummous 200', 'CHH200', 'harissa200'],
+            'Pine Nut Hummous 200': ['Pine Nut Hummous 200', 'CPH200', 'pinenut200'],
+            'Spicy Carrot 200': ['Spicy Carrot 200', 'CSC200', 'spicycarrot200'],
+            'Garlic Dip 180': ['Garlic Dip 180', 'CGD180', 'garlicdip180'],
+            'Taramosalata 180': ['Taramosalata 180', 'CTA180', 'taramosalata180'],
+            'Smoked Salmon 170': ['Smoked Salmon 170', 'CSS170', 'smokedsalmon170'],
+            'Baba Ganoush': ['Baba Ganoush', 'CBG', 'baba'],
+            'Beetroot Hummus': ['Beetroot Hummus', 'CBRH', 'beetroot'],
+            'Chilli Kalamata Hummus': ['Chilli Kalamata Hummus', 'CCHK', 'chillikalamata'],
+            'Harissa Hummus': ['Harissa Hummus', 'CHH', 'harissa'],
+            'Mediterranean Hummus': ['Mediterranean Hummus', 'CMH', 'mediterranean'],
+            'Olive Hummus': ['Olive Hummus', 'COH', 'olive'],
+            'Pine Nut Hummus': ['Pine Nut Hummus', 'CPH', 'pinenut'],
+            'Roasted Garlic Hummus': ['Roasted Garlic Hummus', 'CRGH', 'roastedgarlic'],
+            'Hummus 1kg': ['Hummus 1kg', 'CHM1KG', 'hummus1kg']
         }
 
         # Process each field
