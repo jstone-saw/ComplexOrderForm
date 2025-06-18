@@ -362,10 +362,19 @@ def main():
             column_order = ['Customer Name', 'Order Date', 'Product Code', 'Product Name', 'Size', 'Quantity']
             df = df[column_order]
             
-            # Style the dataframe to center the Quantity column
-            styled_df = df.style.set_properties(**{
-                'text-align': 'center'
-            }, subset=['Quantity'])
+            # Reset index to start at 1
+            df = df.reset_index(drop=True)
+            df.index = df.index + 1
+            
+            # Style the dataframe to center the Quantity column and improve overall appearance
+            styled_df = df.style\
+                .set_properties(**{'text-align': 'center'}, subset=['Quantity'])\
+                .set_table_styles([
+                    {'selector': 'th', 'props': [('text-align', 'left')]},
+                    {'selector': 'td', 'props': [('text-align', 'left')]},
+                    {'selector': 'td.quantity', 'props': [('text-align', 'center')]}  # Special style for Quantity column
+                ])\
+                .apply(lambda x: ['background-color: #f0f0f0' if x.name == 'Quantity' else '' for i in x], axis=1)
             
             # Calculate dynamic height based on number of items
             # Each row needs about 35 pixels of height
