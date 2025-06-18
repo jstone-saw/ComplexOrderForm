@@ -1,5 +1,5 @@
 import streamlit as st
-import PyPDF2
+from pypdf import PdfReader
 import pandas as pd
 from io import BytesIO
 import re
@@ -47,7 +47,7 @@ def extract_pdf_data(pdf_path):
         pdf_stream = BytesIO(pdf_data)
         
         # Create PDF reader
-        pdf_reader = PyPDF2.PdfReader(pdf_stream)
+        pdf_reader = PdfReader(pdf_stream)
         
         # Extract form fields
         form_fields = pdf_reader.get_fields()
