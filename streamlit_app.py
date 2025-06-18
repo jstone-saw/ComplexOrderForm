@@ -362,7 +362,8 @@ def main():
             column_order = ['Customer Name', 'Order Date', 'Product Code', 'Product Name', 'Size', 'Quantity']
             df = df[column_order]
             
-            st.dataframe(df)
+            # Show all rows without scrolling
+            st.dataframe(df, height=2000)  # Adjust height as needed
             
             # Add debugging info under the table
             st.subheader("Extracted Items")
@@ -381,7 +382,6 @@ def main():
                         file_name=filename,
                         mime='text/csv'
                     )
-            else:
                 st.info("No items ordered")
         
         # Clean up
