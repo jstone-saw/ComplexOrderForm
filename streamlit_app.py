@@ -279,22 +279,26 @@ def extract_pdf_data(pdf_path):
                 st.write(f"Looking for codes: {product_codes.keys()}")
                 
                 # First try to match by product code
-                for code, product in product_codes.items():
-                    if code in field_name:
-                        matched_product = product
+                for code in product_codes.keys():
+                    # Look for exact code match at the start of the field name
+                    if field_name.startswith(code):
+                        matched_product = product_codes[code]
                         matched_code = code
-                        st.write(f"Matched by code: {code} -> {product}")
+                        break
+                    # Also check if code is followed by space or underscore
+                    elif f"{code} " in field_name or f"{code}_" in field_name:
+                        matched_product = product_codes[code]
+                        matched_code = code
                         break
                 
                 # If no code match, try pattern matching
                 if not matched_product:
-                    st.write("No code match, trying pattern matching...")
                     for product_name, patterns in product_patterns.items():
                         if any(pattern.lower() in field_name.lower() for pattern in patterns):
                             matched_product = product_name
-                            st.write(f"Matched by pattern: {product_name}")
                             break
-
+                    st.write(f"Matched by pattern: {product_name}")
+                
                 if matched_product:
                     # Look up product details from catalog
                     product_info = product_catalog.get(matched_product)
