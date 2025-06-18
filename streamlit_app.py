@@ -389,7 +389,11 @@ def main():
             st.subheader("Extracted Items")
             for item in data:
                 if item.get('Product Name') != 'Total':
-                    st.write(f"Field: {item.get('Product Name')} ({item.get('Size')}) - Quantity: {item.get('Quantity')}")
+                    product_name = item.get('Product Name', '')
+                    product_code = item.get('Product Code', '')
+                    size = item.get('Size', '')
+                    quantity = item.get('Quantity', 0)
+                    st.write(f"Field: {product_name} (Code: {product_code}, Size: {size}) - Quantity: {quantity}")
             
             # Add CSV export button
             if st.button('Export to CSV'):
