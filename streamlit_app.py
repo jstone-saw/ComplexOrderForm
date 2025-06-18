@@ -241,19 +241,21 @@ def extract_pdf_data(pdf_path):
                         # Create a unique key for this product combination
                         product_key = f"{matched_product}_{size}_{product_info['Product Code']}"
                         
+                        # Create a unique product key using product code and size
+                        product_key = f"{product_info['Product Code']}_{size}"
+                        
                         # Check if this product already exists in line_items
                         existing_item = None
                         for item in line_items:
-                            if (item['Product Name'] == matched_product and 
-                                item['Size'] == size and 
-                                item['Product Code'] == product_info['Product Code']):
+                            if (item['Product Code'] == product_info['Product Code'] and 
+                                item['Size'] == size):
                                 existing_item = item
                                 break
                         
                         if existing_item:
                             # If it exists, add the quantity to the existing item
                             existing_item['Quantity'] += quantity
-                            st.write(f"Adding {quantity} to existing item: {matched_product} ({size}) - New total: {existing_item['Quantity']}")
+                            st.write(f"Adding {quantity} to existing item: {product_key} - New total: {existing_item['Quantity']}")
                         else:
                             # If it doesn't exist, add a new item
                             line_items.append({
@@ -262,7 +264,7 @@ def extract_pdf_data(pdf_path):
                                 'Size': size,
                                 'Quantity': quantity
                             })
-                            st.write(f"Creating new item: {matched_product} ({size}) - Quantity: {quantity}")
+                            st.write(f"Creating new item: {product_key} - Quantity: {quantity}")
                         
                         # Mark this field as processed
                         processed_fields.add(field_name)
