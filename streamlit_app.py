@@ -367,8 +367,14 @@ def main():
                 'text-align': 'center'
             }, subset=['Quantity'])
             
+            # Calculate dynamic height based on number of items
+            # Each row needs about 35 pixels of height
+            # Add 50 pixels for header and some padding
+            num_rows = len(df)
+            dynamic_height = max(50, num_rows * 35)  # Minimum height of 50px
+            
             # Show all rows without scrolling
-            st.dataframe(styled_df, height=2000)  # Adjust height as needed
+            st.dataframe(styled_df, height=dynamic_height)
             
             # Add debugging info under the table
             st.subheader("Extracted Items")
