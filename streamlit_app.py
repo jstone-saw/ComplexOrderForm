@@ -231,12 +231,26 @@ def extract_pdf_data(pdf_path):
                         elif '1kg' in field_name.lower():
                             size = "1kg"
                         
-                        line_items.append({
-                            'Product Name': matched_product,
-                            'Product Code': product_info['Product Code'],
-                            'Size': size,
-                            'Quantity': quantity
-                        })
+                        # Check if this product already exists in line_items
+                        existing_item = None
+                        for item in line_items:
+                            if (item['Product Name'] == matched_product and 
+                                item['Size'] == size and 
+                                item['Product Code'] == product_info['Product Code']):
+                                existing_item = item
+                                break
+                        
+                        if existing_item:
+                            # If it exists, add the quantity to the existing item
+                            existing_item['Quantity'] += quantity
+                        else:
+                            # If it doesn't exist, add a new item
+                            line_items.append({
+                                'Product Name': matched_product,
+                                'Product Code': product_info['Product Code'],
+                                'Size': size,
+                                'Quantity': quantity
+                            })
                     else:
                         st.warning(f"Product '{matched_product}' found in PDF but not in catalog")
                 else:
