@@ -214,10 +214,102 @@ def extract_pdf_data(pdf_path):
 
                 # Try to match field name with product patterns
                 matched_product = None
-                for product_name, patterns in product_patterns.items():
-                    if any(pattern.lower() in field_name.lower() for pattern in patterns):
-                        matched_product = product_name
+                matched_code = None
+                
+                # First try to match by product code if it exists in the field name
+                product_codes = {
+                    'CNCH': 'Chicken Noodle',
+                    'CCRC': 'Creamy Chicken',
+                    'CHB': 'Hearty Beef',
+                    'CAGR': 'Ancient Grain',
+                    'CBAB': 'Beef & Barley',
+                    'CCCORN': 'Chicken & Corn',
+                    'CCMIN': 'Chunky Minestrone',
+                    'CMUSH': 'Creamy Mushroom',
+                    'CRMPUM': 'Creamy Pumpkin',
+                    'CFON': 'French Onion',
+                    'CHVEG': 'Hearty Vegetable',
+                    'CLEN': 'Lentil',
+                    'CPH': 'Pea & Ham',
+                    'CPLE': 'Potato & Leek',
+                    'CSP': 'Sweet Potato',
+                    'CTOM': 'Tomato',
+                    'CCHV350': 'Chicken & Vegetable 350',
+                    'CTOM350': 'Tomato 350',
+                    'CACH': 'Asian Chicken',
+                    'CCCH': 'Crab Chowder',
+                    'CLAK': 'Chicken Laksa',
+                    'CTHP': 'Thai Prawn',
+                    'CACH600': 'Asian Chicken 600',
+                    'CCCH600': 'Crab & Corn 600',
+                    'CTHP600': 'Thai Prawn 600',
+                    'CMOR600': 'Moroccan Harira 600',
+                    'CCTG': 'Chicken Tagine',
+                    'CRCC': 'Red Chicken Curry',
+                    'CRVC': 'Red Vegetable Curry',
+                    'CHM350': 'Hummous 350',
+                    'CHLH330': 'Chilli Lemon Hummous 330',
+                    'CEHH330': 'Chunky Eggplant Hummous 330',
+                    'COHH330': 'Olive Salsa Hummous 330',
+                    'CGD310': 'Garlic Dip 310',
+                    'CTA310': 'Taramosalata 310',
+                    'CBRA200': 'Beetroot Almond 200',
+                    'CHH200': 'Chunky Hummous 200',
+                    'CCS200': 'Capsicum Salsa 200',
+                    'CEC200': 'Eggplant Capsicum 200',
+                    'CEH200': 'Eggplant Hummous 200',
+                    'CHM200': 'Hummous 200',
+                    'CSC200': 'Spicy Carrot 200',
+                    'CGD180': 'Garlic Dip 180',
+                    'CTA180': 'Taramosalata 180',
+                    'CSS170': 'Smoked Salmon 170',
+                    'CBG': 'Baba Ganoush',
+                    'CBRH': 'Beetroot Hummus',
+                    'CCHK': 'Chilli Kalamata Hummus',
+                    'CHH': 'Harissa Hummus',
+                    'CMH': 'Mediterranean Hummus',
+                    'COH': 'Olive Hummus',
+                    'CPH': 'Pine Nut Hummus',
+                    'CRGH': 'Roasted Garlic Hummus',
+                    'CHM1KG': 'Hummus 1kg'
+                }
+                
+                # First try to match by product code
+                for code, product in product_codes.items():
+                    if code in field_name:
+                        matched_product = product
+                        matched_code = code
                         break
+                
+                # If no code match, try pattern matching
+                if not matched_product:
+                    for product_name, patterns in product_patterns.items():
+                        if any(pattern.lower() in field_name.lower() for pattern in patterns):
+                            matched_product = product_name
+                            break
+
+                if matched_product:
+                    # Look up product details from catalog
+                    product_info = product_catalog.get(matched_product)
+                    if product_info:
+                        # Override the product code if we matched by code
+                        if matched_code:
+                            product_info['Product Code'] = matched_code
+                        
+                        # Get size from field name if it contains a size specification
+                        size = product_info['Size']
+                        if '350' in field_name.lower():
+                            size = "350g"
+                        elif '600' in field_name.lower():
+                            size = "600g"
+                        elif '200' in field_name.lower():
+                            size = "200g"
+                        elif '180' in field_name.lower():
+                            size = "180g"
+                        elif '170' in field_name.lower():
+                            size = "170g"
+                        elif '1kg' in field_name.lower():
+                            size = "1kg"
 
                 if matched_product:
                     # Look up product details from catalog
