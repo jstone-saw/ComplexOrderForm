@@ -238,9 +238,6 @@ def extract_pdf_data(pdf_path):
                         elif '1kg' in field_name.lower():
                             size = "1kg"
                         
-                        # Create a unique key for this product combination
-                        product_key = f"{matched_product}_{size}_{product_info['Product Code']}"
-                        
                         # Create a unique product key using product code and size
                         product_key = f"{product_info['Product Code']}_{size}"
                         
@@ -355,7 +352,9 @@ def main():
             # Display line items
             st.subheader("Order Details")
             if data['line_items']:
+                # Create DataFrame with columns reordered to show Product Code first
                 df = pd.DataFrame(data['line_items'])
+                df = df[['Product Code', 'Product Name', 'Size', 'Quantity']]
                 st.dataframe(df)
                 
                 # Add CSV export button
