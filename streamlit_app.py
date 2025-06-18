@@ -219,10 +219,17 @@ def extract_pdf_data(pdf_path):
 
                 # Try to match field name with product patterns
                 matched_product = None
+                matched_pattern = None
+                
+                # Find the most specific pattern match
                 for product_name, patterns in product_patterns.items():
-                    if any(pattern.lower() in field_name.lower() for pattern in patterns):
-                        matched_product = product_name
-                        break
+                    for pattern in patterns:
+                        if pattern.lower() in field_name.lower():
+                            # Check if this is a more specific match than previous matches
+                            if matched_product is None or len(pattern) > len(matched_pattern):
+                                matched_product = product_name
+                                matched_pattern = pattern
+                                break
 
                 if matched_product:
                     # Look up product details from catalog
@@ -248,7 +255,7 @@ def extract_pdf_data(pdf_path):
                         
                         # Check if we've already processed this exact field
                         if field_name in processed_fields:
-                            st.warning(f"Skipping duplicate field: {field_name}")
+                            st.warning(f"Skipping duplicate field: {field_name} (matched: {matched_product} with pattern: {matched_pattern})")
                             continue
                         
                         # Create new order item
@@ -262,6 +269,9 @@ def extract_pdf_data(pdf_path):
                         order_data.append(order_item)
                         processed_fields.add(field_name)
                         processed_products[product_key] = order_item
+                        
+                        # Log the successful match
+                        st.write(f"Matched field '{field_name}' as '{matched_product}' using pattern '{matched_pattern}'")
                     else:
                         st.warning(f"Product '{matched_product}' found in PDF but not in catalog")
                 else:
