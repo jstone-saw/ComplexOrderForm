@@ -10,14 +10,62 @@ def load_product_catalog():
     try:
         catalog_df = pd.read_excel('ProductCatalog.xlsx')
         product_catalog = {}
+        
+        # Create mapping of all known products from PDF
+        known_products = {
+            'Ancient Grain', 'Beef & Barley', 'Chicken & Corn', 'Chicken Noodle',
+            'Chunky Minestrone', 'Creamy Chicken', 'Creamy Mushroom', 'Creamy Pumpkin',
+            'French Onion', 'Hearty Beef', 'Hearty Chicken', 'Hearty Vegetable',
+            'Lentil', 'Pea & Ham', 'Potato & Leek', 'Sweet Potato', 'Tomato',
+            'Chixken & Vegetable 350', 'Classic Pumpkin', 'Tomato 350',
+            'Asian Chicken', 'Crab Chowder', 'Chicken Laksa', 'Thai Prawn',
+            'Asian Chicken 600', 'Crab & Corn 600', 'Thai Prawn 600',
+            'Moroccan Harira 600', 'Chicken Tagine', 'Red Chicken Curry',
+            'Red Vegetable Curry', 'Hummous 350', 'Chilli Lemon Hummous 330',
+            'Chunky Eggplant Hummous 330', 'Olive Salsa Hummous 330',
+            'Garlic Dip 310', 'Taramosalata 310', 'Beetroot Almond 200',
+            'Chunky Hummous 200', 'Capsicum Salsa 200', 'Eggplant Capsicum 200',
+            'Eggplant Hummous 200', 'Hummous 200', 'Harissa Hummous 200',
+            'Pine Nut Hummous 200', 'Spicy Carrot 200', 'Garlic Dip 180',
+            'Taramosalata 180', 'Smoked Salmon 170', 'Baba Ganoush',
+            'Beetroot Hummus', 'Chilli Kalamata Hummus', 'Harissa Hummus',
+            'Mediterranean Hummus', 'Olive Hummus', 'Pine Nut Hummus',
+            'Roasted Garlic Hummus', 'Hummus 1kg'
+        }
+        
+        # Load products from Excel
         for _, row in catalog_df.iterrows():
             product_name = str(row['Product Name']).strip()
             if not product_name:
                 continue
-            product_catalog[product_name] = {
-                'Product Code': str(row['Code']).strip(),
-                'Size': str(row['Size']).strip()
-            }
+                
+            # Add product to catalog if it's one of our known products
+            if product_name in known_products:
+                product_catalog[product_name] = {
+                    'Product Code': str(row['Code']).strip(),
+                    'Size': str(row['Size']).strip()
+                }
+                
+                # Also add variations of the product name
+                variations = {
+                    # Handle common misspellings
+                    'Chixken': 'Chicken',
+                    'Hummous': 'Hummus'
+                }
+                
+                for misspelling, correct in variations.items():
+                    if misspelling in product_name:
+                        corrected_name = product_name.replace(misspelling, correct)
+                        product_catalog[corrected_name] = product_catalog[product_name]
+        
+        # Add any missing products with default values
+        for product in known_products:
+            if product not in product_catalog:
+                product_catalog[product] = {
+                    'Product Code': f'C{product[:4].upper()}',  # Generate a default code
+                    'Size': 'Unknown'  # Will be updated later
+                }
+        
         return product_catalog
     except Exception as e:
         st.error(f"Error loading product catalog: {str(e)}")
