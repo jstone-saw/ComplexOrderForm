@@ -77,8 +77,7 @@ def extract_pdf_data(pdf_path):
         product_catalog = load_product_catalog()
         
         # Initialize data structures
-        order_data = {}
-        line_items = []
+        order_data = []  # Changed to a list of dictionaries
         customer_info = {}
         
         # Read PDF file
@@ -193,12 +192,21 @@ def extract_pdf_data(pdf_path):
                 # Try to parse quantity
                 quantity = None
                 try:
+                    # Try multiple quantity parsing methods
+                    # 1. Direct integer conversion
                     quantity = int(value)
                 except ValueError:
-                    # Try to extract numbers from string
-                    numbers = re.findall(r'\d+', str(value))
-                    if numbers:
-                        quantity = int(numbers[0])
+                    try:
+                        # 2. Extract numbers from string
+                        numbers = re.findall(r'\d+', str(value))
+                        if numbers:
+                            quantity = int(numbers[0])
+                    except:
+                        try:
+                            # 3. Handle decimal numbers
+                            quantity = int(float(value))
+                        except:
+                            pass
                 
                 if quantity is None or quantity <= 0:
                     continue
@@ -231,12 +239,15 @@ def extract_pdf_data(pdf_path):
                         elif '1kg' in field_name.lower():
                             size = "1kg"
                         
-                        line_items.append({
+                        # Create order item with customer info
+                        order_item = {
                             'Product Name': matched_product,
                             'Product Code': product_info['Product Code'],
                             'Size': size,
-                            'Quantity': quantity
-                        })
+                            'Quantity': quantity,
+                            **customer_info  # Include all customer info
+                        }
+                        order_data.append(order_item)
                     else:
                         st.warning(f"Product '{matched_product}' found in PDF but not in catalog")
                 else:
@@ -247,49 +258,48 @@ def extract_pdf_data(pdf_path):
                 continue
 
         # Calculate statistics
-        total_products = len(line_items)
-        total_quantity = sum(item['Quantity'] for item in line_items)
+        total_products = len(order_data)
+        total_quantity = sum(item['Quantity'] for item in order_data)
 
-        # Store processed data
-        order_data.update({
-            'customer_info': customer_info,
-            'line_items': line_items,
-            'stats': {
-                'total_products': total_products,
-                'total_quantity': total_quantity
-            }
-        })
+        # Add statistics as a separate item
+        stats_item = {
+            'Product Name': 'Total',
+            'Product Code': '',
+            'Size': '',
+            'Quantity': total_quantity,
+            'Total Products': total_products,
+            **customer_info
+        }
+        order_data.append(stats_item)
 
         return order_data
 
     except Exception as e:
         st.error(f"Error extracting PDF data: {str(e)}")
+        return []
         return None
 
 # Export order data to CSV
 def export_to_csv(data):
     try:
-        df = pd.DataFrame(data['line_items'])
-        
-        # Add customer information as columns
-        customer_info = data['customer_info']
-        for key, value in customer_info.items():
-            df[key] = value
-        
-        # Add statistics
-        stats = data['stats']
-        df['Total Products'] = stats['total_products']
-        df['Total Quantity'] = stats['total_quantity']
+        if not data:
+            st.error("No data to export")
+            return None
+            
+        # Create DataFrame directly from the flattened data
+        df = pd.DataFrame(data)
         
         # Generate filename with timestamp
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"order_{timestamp}.csv"
         
-        # Save to CSV
-        df.to_csv(filename, index=False)
+        # Save to CSV with proper formatting
+        df.to_csv(filename, index=False, encoding='utf-8')
+        
         return filename
     except Exception as e:
         st.error(f"Error exporting to CSV: {str(e)}")
+        return None
         return None
 
 def main():
