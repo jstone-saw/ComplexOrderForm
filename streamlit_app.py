@@ -184,6 +184,8 @@ def extract_pdf_data(pdf_path):
         }
 
         # Process each field
+        processed_fields = set()  # Track which fields we've processed
+        
         for field_name, field in form_fields.items():
             try:
                 value = field.get('/V', '')
@@ -201,6 +203,11 @@ def extract_pdf_data(pdf_path):
                         quantity = int(numbers[0])
                 
                 if quantity is None or quantity <= 0:
+                    continue
+
+                # Skip if we've already processed this field
+                if field_name in processed_fields:
+                    st.write(f"Skipping duplicate field: {field_name}")
                     continue
 
                 st.write(f"Processing field: {field_name} with quantity: {quantity}")
@@ -231,6 +238,9 @@ def extract_pdf_data(pdf_path):
                         elif '1kg' in field_name.lower():
                             size = "1kg"
                         
+                        # Create a unique key for this product combination
+                        product_key = f"{matched_product}_{size}_{product_info['Product Code']}"
+                        
                         # Check if this product already exists in line_items
                         existing_item = None
                         for item in line_items:
@@ -243,6 +253,7 @@ def extract_pdf_data(pdf_path):
                         if existing_item:
                             # If it exists, add the quantity to the existing item
                             existing_item['Quantity'] += quantity
+                            st.write(f"Adding {quantity} to existing item: {matched_product} ({size}) - New total: {existing_item['Quantity']}")
                         else:
                             # If it doesn't exist, add a new item
                             line_items.append({
@@ -251,6 +262,10 @@ def extract_pdf_data(pdf_path):
                                 'Size': size,
                                 'Quantity': quantity
                             })
+                            st.write(f"Creating new item: {matched_product} ({size}) - Quantity: {quantity}")
+                        
+                        # Mark this field as processed
+                        processed_fields.add(field_name)
                     else:
                         st.warning(f"Product '{matched_product}' found in PDF but not in catalog")
                 else:
